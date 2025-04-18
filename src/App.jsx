@@ -118,14 +118,21 @@ function updateCardProgress(word, isCorrect) {
   saveCardProgress(progress)
 }
 
+function getRandomExample(card) {
+  const randomIndex = Math.floor(Math.random() * card.examples.length)
+  return card.examples[randomIndex]
+}
+
 function App() {
   const [currentWord, setCurrentWord] = useState(null)
+  const [currentExample, setCurrentExample] = useState(null)
   const [progressPercentage, setProgressPercentage] = useState(0)
 
   useEffect(() => {
     if (wordList.length > 0) {
       const firstWord = getNextCard()
       setCurrentWord(firstWord)
+      setCurrentExample(getRandomExample(firstWord))
     }
     setProgressPercentage(getDailyProgressPercentage())
   }, [])
@@ -137,12 +144,14 @@ function App() {
     const nextWord = getNextCard()
     if (!nextWord) {
       setCurrentWord(null)
+      setCurrentExample(null)
       return
     }
     setCurrentWord(nextWord)
+    setCurrentExample(getRandomExample(nextWord))
   }
 
-  if (!currentWord) {
+  if (!currentWord || !currentExample) {
     return (
       <div className="app">
         <div className="progress-container">
@@ -171,8 +180,8 @@ function App() {
       </div>
       <Flashcard 
         word={currentWord.word}
-        example={currentWord.examples[0].sentence}
-        translation={currentWord.examples[0].sentence_translation}
+        example={currentExample.sentence}
+        translation={currentExample.sentence_translation}
         onComplete={handleCardComplete}
       />
     </div>
