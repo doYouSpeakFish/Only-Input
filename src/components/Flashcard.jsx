@@ -54,15 +54,13 @@ function Flashcard({ word, example, translation, onComplete }) {
   }
 
   const handleCorrect = () => {
-    updateCardProgress(word, true)
+    onComplete(true)
     setIsRevealed(false)
-    onComplete()
   }
 
   const handleWrong = () => {
-    updateCardProgress(word, false)
+    onComplete(false)
     setIsRevealed(false)
-    onComplete()
   }
 
   return (

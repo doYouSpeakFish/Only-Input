@@ -141,4 +141,59 @@ describe('Flashcard', () => {
       })
     })
   })
+
+  describe('Daily Progress Tracking', () => {
+    beforeEach(() => {
+      cy.clearLocalStorage()
+    })
+
+    it('tracks correct cards by date', () => {
+      cy.visit('/')
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="correct-button"]').click()
+      
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+      cy.window().then((win) => {
+        const progress = JSON.parse(win.localStorage.getItem('dailyProgress') || '{}')
+        expect(progress[today]).to.equal(1)
+      })
+    })
+
+    it('increments correct count when correct is clicked', () => {
+      cy.visit('/')
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="correct-button"]').click()
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="correct-button"]').click()
+      
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+      cy.window().then((win) => {
+        const progress = JSON.parse(win.localStorage.getItem('dailyProgress') || '{}')
+        expect(progress[today]).to.equal(2)
+      })
+    })
+
+    it('does not increment correct count when wrong is clicked', () => {
+      cy.visit('/')
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="wrong-button"]').click()
+      
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+      cy.window().then((win) => {
+        const progress = JSON.parse(win.localStorage.getItem('dailyProgress') || '{}')
+        expect(progress[today]).to.be.undefined
+      })
+    })
+
+    it('displays progress bar with correct percentage', () => {
+      cy.visit('/')
+      cy.get('[data-testid="progress-bar"]').should('exist')
+      cy.get('[data-testid="progress-bar"]').should('have.attr', 'style', 'width: 0%;')
+      
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="correct-button"]').click()
+      
+      cy.get('[data-testid="progress-bar"]').should('have.attr', 'style', 'width: 0.5%;')
+    })
+  })
 }) 
