@@ -79,7 +79,7 @@ function App() {
 
   useEffect(() => {
     if (wordList.length > 0) {
-      const firstWord = wordList[0] // Always start with the first word
+      const firstWord = getNextCard()
       setCurrentWord(firstWord)
       const randomIndex = Math.floor(Math.random() * firstWord.examples.length)
       setCurrentExample(firstWord.examples[randomIndex])
