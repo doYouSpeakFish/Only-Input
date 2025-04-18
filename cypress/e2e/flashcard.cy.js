@@ -1,5 +1,9 @@
 describe('Flashcard', () => {
   beforeEach(() => {
+    // Clear localStorage before each test
+    cy.window().then((win) => {
+      win.localStorage.clear()
+    })
     cy.visit('/')
   })
 
@@ -47,16 +51,94 @@ describe('Flashcard', () => {
     cy.get('[data-testid="german-word"]').should('not.be.empty')
   })
 
-  it('shows empty state message when no more cards are available', () => {
-    // Click through all cards
-    cy.get('[data-testid="reveal-button"]').click()
-    cy.get('[data-testid="correct-button"]').click()
-    cy.get('[data-testid="reveal-button"]').click()
-    cy.get('[data-testid="correct-button"]').click()
-    cy.get('[data-testid="reveal-button"]').click()
-    cy.get('[data-testid="correct-button"]').click()
-    
-    // Check for empty state message
-    cy.get('[data-testid="empty-state"]').should('exist')
+  describe('Card Progress Tracking', () => {
+    it('increments total cards shown in localStorage', () => {
+      cy.window().then((win) => {
+        expect(win.localStorage.getItem('totalCardsShown')).to.be.null
+      })
+      
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="correct-button"]').click()
+      
+      cy.window().then((win) => {
+        expect(win.localStorage.getItem('totalCardsShown')).to.equal('1')
+      })
+    })
+
+    it('stores card progress in localStorage after review', () => {
+      cy.get('[data-testid="german-word"]').then(($word) => {
+        const currentWord = $word.text()
+        
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="correct-button"]').click()
+        
+        cy.window().then((win) => {
+          const progress = JSON.parse(win.localStorage.getItem('cardProgress'))
+          expect(progress[currentWord]).to.deep.equal({
+            lastShownAt: 0,
+            cardsUntilNextReview: 10
+          })
+        })
+      })
+    })
+
+    it('doubles cardsUntilNextReview when correct is clicked', () => {
+      cy.get('[data-testid="german-word"]').then(($word) => {
+        const currentWord = $word.text()
+        
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="correct-button"]').click()
+        
+        // Review cards until the first card is shown again
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="correct-button"]').click()
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="correct-button"]').click()
+
+        // Review the first card again
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="correct-button"]').click()
+        
+        cy.window().then((win) => {
+          const progress = JSON.parse(win.localStorage.getItem('cardProgress'))
+          expect(progress[currentWord].cardsUntilNextReview).to.equal(20)
+        })
+      })
+    })
+
+    it('halves cardsUntilNextReview when wrong is clicked', () => {
+      cy.get('[data-testid="german-word"]').then(($word) => {
+        const currentWord = $word.text()
+        
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="wrong-button"]').click()
+        
+        cy.window().then((win) => {
+          const progress = JSON.parse(win.localStorage.getItem('cardProgress'))
+          expect(progress[currentWord].cardsUntilNextReview).to.equal(10)
+        })
+      })
+    })
+
+    it('shows most overdue card next', () => {
+      // Review first card
+      cy.get('[data-testid="german-word"]').then(($word) => {
+        const firstWord = $word.text()
+        
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="correct-button"]').click()
+        
+        // Review second card
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="wrong-button"]').click()
+
+        // Review third card
+        cy.get('[data-testid="reveal-button"]').click()
+        cy.get('[data-testid="correct-button"]').click()
+        
+        // Show next card (should be the first one again since it's more overdue)
+        cy.get('[data-testid="german-word"]').should('have.text', firstWord)
+      })
+    })
   })
 }) 
