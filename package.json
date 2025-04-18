@@ -7,7 +7,8 @@
     "dev:real": "VITE_USE_REAL_DATA=true vite",
     "test": "cypress run",
     "test:open": "cypress open",
-    "build": "vite build"
+    "build": "vite build",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "keywords": [],
   "author": "",
