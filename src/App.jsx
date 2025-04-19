@@ -160,19 +160,30 @@ function App() {
   const [progressPercentage, setProgressPercentage] = useState(0)
   const [progressColors, setProgressColors] = useState(['red'])
   const [correctToday, setCorrectToday] = useState(0)
+  const [showCompletion, setShowCompletion] = useState(false)
 
   useEffect(() => {
-    if (wordList.length > 0) {
-      const firstWord = getNextCard()
-      setCurrentWord(firstWord)
-      setCurrentExample(getRandomExample(firstWord))
-    }
     const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
     const progress = getDailyProgress()
     const todayProgress = progress[today] || 0
     setCorrectToday(todayProgress)
     setProgressPercentage(getDailyProgressPercentage())
     setProgressColors(getProgressColors(todayProgress))
+
+    // Only show completion message if we load the page exactly at 210 cards
+    setShowCompletion(todayProgress === 210)
+
+    if (todayProgress >= 210) {
+      const nextWord = getNextCard()
+      if (nextWord) {
+        setCurrentWord(nextWord)
+        setCurrentExample(getRandomExample(nextWord))
+      }
+    } else if (wordList.length > 0) {
+      const firstWord = getNextCard()
+      setCurrentWord(firstWord)
+      setCurrentExample(getRandomExample(firstWord))
+    }
   }, [])
 
   const handleCardComplete = (isCorrect) => {
@@ -184,49 +195,32 @@ function App() {
     setCorrectToday(todayProgress)
     setProgressPercentage(getDailyProgressPercentage())
     setProgressColors(getProgressColors(todayProgress))
-    const nextWord = getNextCard()
-    if (!nextWord) {
+
+    // Show completion message only when we've just reached 210
+    if (todayProgress === 210) {
+      setShowCompletion(true)
       setCurrentWord(null)
       setCurrentExample(null)
-      return
+    } else {
+      const nextWord = getNextCard()
+      setCurrentWord(nextWord)
+      if (nextWord) {
+        setCurrentExample(getRandomExample(nextWord))
+      }
     }
-    setCurrentWord(nextWord)
-    setCurrentExample(getRandomExample(nextWord))
   }
 
-  if (!currentWord || !currentExample) {
-    return (
-      <div className="app">
-        <div className="progress-container">
-          <div className="progress-bar" data-testid="progress-bar">
-            {progressColors.map(({ color, width, left }) => (
-              <div
-                key={color}
-                className={`progress-section ${color}`}
-                style={{
-                  width,
-                  left,
-                  position: 'absolute',
-                  height: '100%',
-                  transition: 'width 0.3s ease'
-                }}
-              />
-            ))}
-          </div>
-          <div className="progress-counter" data-testid="progress-counter">
-            Daily progress: {correctToday}/210
-          </div>
-        </div>
-        <div data-testid="empty-state" className="empty-state">
-          <h2>No more cards!</h2>
-          <p>You've completed all the available flashcards.</p>
-        </div>
-      </div>
-    )
+  const handleContinue = () => {
+    setShowCompletion(false)
+    const nextWord = getNextCard()
+    if (nextWord) {
+      setCurrentWord(nextWord)
+      setCurrentExample(getRandomExample(nextWord))
+    }
   }
 
   return (
-    <div className="app">
+    <div className="container">
       <div className="progress-container">
         <div className="progress-bar" data-testid="progress-bar">
           {progressColors.map(({ color, width, left }) => (
@@ -247,12 +241,30 @@ function App() {
           Daily progress: {correctToday}/210
         </div>
       </div>
-      <Flashcard 
-        word={currentWord.word}
-        example={currentExample.sentence}
-        translation={currentExample.sentence_translation}
-        onComplete={handleCardComplete}
-      />
+      
+      {showCompletion ? (
+        <div className="completion-message">
+          <h2>Congratulations!</h2>
+          <p>You have completed all 210 cards for today!</p>
+          <button className="continue-button" onClick={handleContinue}>
+            Continue Practicing
+          </button>
+        </div>
+      ) : currentWord ? (
+        <div className="card">
+          <Flashcard 
+            word={currentWord.word}
+            example={currentExample.sentence}
+            translation={currentExample.sentence_translation}
+            onComplete={handleCardComplete}
+          />
+        </div>
+      ) : (
+        <div data-testid="empty-state" className="empty-state">
+          <h2>No more cards!</h2>
+          <p>You've completed all the available flashcards.</p>
+        </div>
+      )}
     </div>
   )
 }

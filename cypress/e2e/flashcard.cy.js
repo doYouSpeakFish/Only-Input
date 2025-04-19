@@ -288,4 +288,83 @@ describe('Flashcard', () => {
       cy.get('[data-testid="progress-counter"]').should('have.text', 'Daily progress: 30/210')
     })
   })
+
+  describe('Completion Message', () => {
+    beforeEach(() => {
+      cy.clearLocalStorage();
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      cy.window().then((win) => {
+        win.localStorage.setItem('dailyProgress', JSON.stringify({
+          [today]: 210
+        }));
+        win.localStorage.setItem('cardProgress', JSON.stringify({
+          'Test Word 1': { lastShownAt: 0, cardsUntilNextReview: 10 },
+          'Test Word 2': { lastShownAt: 1, cardsUntilNextReview: 10 }
+        }));
+        win.localStorage.setItem('totalCardsShown', '210');
+      });
+      cy.visit('/');
+    });
+
+    it('shows congratulations message when all cards are completed', () => {
+      // Initialize localStorage with 209 cards shown
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+      
+      // Set daily progress to 209
+      const dailyProgress = {
+        [today]: 209
+      }
+      localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress))
+      
+      // Set card progress
+      const cardProgress = {
+        'Test Word 1': { lastShownAt: 208, cardsUntilNextReview: 20 },
+        'Test Word 2': { lastShownAt: 209, cardsUntilNextReview: 20 }
+      }
+      localStorage.setItem('cardProgress', JSON.stringify(cardProgress))
+      
+      // Set total cards shown
+      localStorage.setItem('totalCardsShown', '209')
+
+      // Visit the page after setting localStorage
+      cy.visit('/')
+
+      // Complete one more card to reach 210
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="correct-button"]').click()
+
+      cy.get('.completion-message').should('be.visible')
+      cy.get('.completion-message h2').should('contain', 'Congratulations!')
+      cy.get('.completion-message p').should('contain', 'You have completed all 210 cards for today!')
+    })
+
+    it('shows continue button in completion message', () => {
+      cy.get('.completion-message .continue-button')
+        .should('exist')
+        .and('have.text', 'Continue Practicing')
+    })
+
+    it('shows next card when continue button is clicked', () => {
+      cy.get('.completion-message .continue-button').click()
+
+      // Check that we're back to showing a card
+      cy.get('.card', { timeout: 10000 }).should('exist')
+      cy.get('[data-testid="german-word"]').should('exist')
+      cy.get('[data-testid="example-sentence"]').should('exist')
+      cy.get('[data-testid="reveal-button"]').should('exist')
+    })
+
+    it('does not show congratulations message after continuing past 210 cards', () => {
+      // Click continue after completing 210 cards
+      cy.get('.completion-message .continue-button').click()
+
+      // Complete another card
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="correct-button"]').click()
+
+      // Verify congratulations message is not shown
+      cy.get('.completion-message').should('not.exist')
+      cy.get('.card').should('exist')
+    })
+  })
 }) 
