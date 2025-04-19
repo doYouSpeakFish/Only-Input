@@ -159,6 +159,7 @@ function App() {
   const [currentExample, setCurrentExample] = useState(null)
   const [progressPercentage, setProgressPercentage] = useState(0)
   const [progressColors, setProgressColors] = useState(['red'])
+  const [correctToday, setCorrectToday] = useState(0)
 
   useEffect(() => {
     if (wordList.length > 0) {
@@ -168,9 +169,10 @@ function App() {
     }
     const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
     const progress = getDailyProgress()
-    const correctToday = progress[today] || 0
+    const todayProgress = progress[today] || 0
+    setCorrectToday(todayProgress)
     setProgressPercentage(getDailyProgressPercentage())
-    setProgressColors(getProgressColors(correctToday))
+    setProgressColors(getProgressColors(todayProgress))
   }, [])
 
   const handleCardComplete = (isCorrect) => {
@@ -178,9 +180,10 @@ function App() {
     updateDailyProgress(isCorrect)
     const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
     const progress = getDailyProgress()
-    const correctToday = progress[today] || 0
+    const todayProgress = progress[today] || 0
+    setCorrectToday(todayProgress)
     setProgressPercentage(getDailyProgressPercentage())
-    setProgressColors(getProgressColors(correctToday))
+    setProgressColors(getProgressColors(todayProgress))
     const nextWord = getNextCard()
     if (!nextWord) {
       setCurrentWord(null)
@@ -210,6 +213,9 @@ function App() {
               />
             ))}
           </div>
+          <div className="progress-counter" data-testid="progress-counter">
+            Daily progress: {correctToday}/210
+          </div>
         </div>
         <div data-testid="empty-state" className="empty-state">
           <h2>No more cards!</h2>
@@ -236,6 +242,9 @@ function App() {
               }}
             />
           ))}
+        </div>
+        <div className="progress-counter" data-testid="progress-counter">
+          Daily progress: {correctToday}/210
         </div>
       </div>
       <Flashcard 

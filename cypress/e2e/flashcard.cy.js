@@ -257,4 +257,35 @@ describe('Flashcard', () => {
       })
     })
   })
+
+  describe('Progress Counter', () => {
+    beforeEach(() => {
+      cy.clearLocalStorage()
+    })
+
+    it('shows initial progress of 0/210', () => {
+      cy.visit('/')
+      cy.get('[data-testid="progress-counter"]').should('have.text', 'Daily progress: 0/210')
+    })
+
+    it('updates progress counter after completing a card', () => {
+      cy.visit('/')
+      cy.get('[data-testid="reveal-button"]').click()
+      cy.get('[data-testid="correct-button"]').click()
+      cy.get('[data-testid="progress-counter"]').should('have.text', 'Daily progress: 1/210')
+    })
+
+    it('updates progress counter when localStorage is modified', () => {
+      // Set progress directly in localStorage
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+      cy.window().then((win) => {
+        win.localStorage.setItem('dailyProgress', JSON.stringify({
+          [today]: 30
+        }))
+      })
+      
+      cy.visit('/')
+      cy.get('[data-testid="progress-counter"]').should('have.text', 'Daily progress: 30/210')
+    })
+  })
 }) 
