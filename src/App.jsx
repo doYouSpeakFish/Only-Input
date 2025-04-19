@@ -46,7 +46,38 @@ function getDailyProgressPercentage() {
   const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
   const progress = getDailyProgress()
   const correctToday = progress[today] || 0
-  return (correctToday / 200) * 100
+  return (correctToday / 210) * 100 // Updated to 210 cards
+}
+
+function getProgressColors(correctToday) {
+  const sections = 7
+  const cardsPerSection = 30
+  const totalSections = Math.ceil(correctToday / cardsPerSection)
+  
+  const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
+  const activeColors = colors.slice(0, totalSections)
+  
+  return activeColors.map((color, index) => {
+    const isLastSection = index === totalSections - 1
+    const isFullSection = correctToday >= (index + 1) * cardsPerSection
+    const sectionWidth = 100 / sections
+    
+    let width
+    if (isFullSection) {
+      width = sectionWidth
+    } else if (isLastSection) {
+      const remainingCards = correctToday % cardsPerSection
+      width = (remainingCards / cardsPerSection) * sectionWidth
+    } else {
+      width = 0
+    }
+    
+    return {
+      color,
+      width: `${width.toFixed(4)}%`,
+      left: `${(index * sectionWidth).toFixed(4)}%`
+    }
+  })
 }
 
 function getTotalCardsShown() {
@@ -127,6 +158,7 @@ function App() {
   const [currentWord, setCurrentWord] = useState(null)
   const [currentExample, setCurrentExample] = useState(null)
   const [progressPercentage, setProgressPercentage] = useState(0)
+  const [progressColors, setProgressColors] = useState(['red'])
 
   useEffect(() => {
     if (wordList.length > 0) {
@@ -134,13 +166,21 @@ function App() {
       setCurrentWord(firstWord)
       setCurrentExample(getRandomExample(firstWord))
     }
+    const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+    const progress = getDailyProgress()
+    const correctToday = progress[today] || 0
     setProgressPercentage(getDailyProgressPercentage())
+    setProgressColors(getProgressColors(correctToday))
   }, [])
 
   const handleCardComplete = (isCorrect) => {
     updateCardProgress(currentWord.word, isCorrect)
     updateDailyProgress(isCorrect)
+    const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+    const progress = getDailyProgress()
+    const correctToday = progress[today] || 0
     setProgressPercentage(getDailyProgressPercentage())
+    setProgressColors(getProgressColors(correctToday))
     const nextWord = getNextCard()
     if (!nextWord) {
       setCurrentWord(null)
@@ -155,11 +195,21 @@ function App() {
     return (
       <div className="app">
         <div className="progress-container">
-          <div 
-            className="progress-bar" 
-            data-testid="progress-bar"
-            style={{ width: `${progressPercentage}%` }}
-          />
+          <div className="progress-bar" data-testid="progress-bar">
+            {progressColors.map(({ color, width, left }) => (
+              <div
+                key={color}
+                className={`progress-section ${color}`}
+                style={{
+                  width,
+                  left,
+                  position: 'absolute',
+                  height: '100%',
+                  transition: 'width 0.3s ease'
+                }}
+              />
+            ))}
+          </div>
         </div>
         <div data-testid="empty-state" className="empty-state">
           <h2>No more cards!</h2>
@@ -172,11 +222,21 @@ function App() {
   return (
     <div className="app">
       <div className="progress-container">
-        <div 
-          className="progress-bar" 
-          data-testid="progress-bar"
-          style={{ width: `${progressPercentage}%` }}
-        />
+        <div className="progress-bar" data-testid="progress-bar">
+          {progressColors.map(({ color, width, left }) => (
+            <div
+              key={color}
+              className={`progress-section ${color}`}
+              style={{
+                width,
+                left,
+                position: 'absolute',
+                height: '100%',
+                transition: 'width 0.3s ease'
+              }}
+            />
+          ))}
+        </div>
       </div>
       <Flashcard 
         word={currentWord.word}

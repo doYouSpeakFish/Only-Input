@@ -188,12 +188,73 @@ describe('Flashcard', () => {
     it('displays progress bar with correct percentage', () => {
       cy.visit('/')
       cy.get('[data-testid="progress-bar"]').should('exist')
-      cy.get('[data-testid="progress-bar"]').should('have.attr', 'style', 'width: 0%;')
       
+      // Complete one card
       cy.get('[data-testid="reveal-button"]').click()
       cy.get('[data-testid="correct-button"]').click()
       
-      cy.get('[data-testid="progress-bar"]').should('have.attr', 'style', 'width: 0.5%;')
+      // Verify progress bar shows correct width
+      cy.get('.progress-section.red').invoke('width').should('be.closeTo', 5, 1) // Approximately 0.47619% of container width
+    })
+  })
+
+  describe('Rainbow Progress Bar', () => {
+    beforeEach(() => {
+      cy.clearLocalStorage()
+    })
+
+    it('shows only red section after 30 cards', () => {
+      // Set progress directly in localStorage
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+      cy.window().then((win) => {
+        win.localStorage.setItem('dailyProgress', JSON.stringify({
+          [today]: 30
+        }))
+      })
+      
+      cy.visit('/')
+      
+      // Verify only red section is present and has correct width
+      cy.get('.progress-section.red').should('exist')
+      cy.get('.progress-section.orange').should('not.exist')
+      cy.get('.progress-section.red').invoke('width').should('be.closeTo', 143, 1) // Approximately 14.2857% of container width
+    })
+
+    it('shows red and orange sections after 31 cards', () => {
+      // Set progress directly in localStorage
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+      cy.window().then((win) => {
+        win.localStorage.setItem('dailyProgress', JSON.stringify({
+          [today]: 31
+        }))
+      })
+      
+      cy.visit('/')
+      
+      // Verify both sections are present with correct widths
+      cy.get('.progress-section.red').should('exist')
+      cy.get('.progress-section.orange').should('exist')
+      cy.get('.progress-section.red').invoke('width').should('be.closeTo', 143, 1) // Approximately 14.2857% of container width
+      cy.get('.progress-section.orange').invoke('width').should('be.closeTo', 5, 1) // Approximately 0.47619% of container width
+    })
+
+    it('shows all sections with correct widths after 210 cards', () => {
+      // Set progress directly in localStorage
+      const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
+      cy.window().then((win) => {
+        win.localStorage.setItem('dailyProgress', JSON.stringify({
+          [today]: 210
+        }))
+      })
+      
+      cy.visit('/')
+      
+      // Verify all sections are present with correct widths
+      const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
+      colors.forEach(color => {
+        cy.get(`.progress-section.${color}`).should('exist')
+        cy.get(`.progress-section.${color}`).invoke('width').should('be.closeTo', 143, 1) // Approximately 14.2857% of container width
+      })
     })
   })
 }) 

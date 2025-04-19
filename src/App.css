@@ -19,6 +19,41 @@
 
 .progress-bar {
   height: 100%;
-  background-color: #4CAF50;
   transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-section {
+  position: absolute;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+.progress-section.red {
+  background-color: #ff0000;
+}
+
+.progress-section.orange {
+  background-color: #ff7f00;
+}
+
+.progress-section.yellow {
+  background-color: #ffff00;
+}
+
+.progress-section.green {
+  background-color: #00ff00;
+}
+
+.progress-section.blue {
+  background-color: #0000ff;
+}
+
+.progress-section.indigo {
+  background-color: #4b0082;
+}
+
+.progress-section.violet {
+  background-color: #9400d3;
 } 
