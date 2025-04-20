@@ -243,21 +243,23 @@ function App() {
       </div>
       
       {showCompletion ? (
-        <div className="completion-message">
-          <h2>Congratulations!</h2>
-          <p>You have completed all 210 cards for today!</p>
-          <button className="continue-button" onClick={handleContinue}>
-            Continue Practicing
-          </button>
+        <div className="card-container">
+          <div className="completion-message">
+            <h2>Congratulations!</h2>
+            <p>You have completed all 210 cards for today!</p>
+            <button className="continue-button" onClick={handleContinue}>
+              Continue Practicing
+            </button>
+          </div>
         </div>
       ) : currentWord ? (
-        <div className="card">
-          <Flashcard 
-            word={currentWord.word}
-            example={currentExample.sentence}
-            translation={currentExample.sentence_translation}
-            onComplete={handleCardComplete}
-          />
+        <div className="card-container">
+            <Flashcard 
+              word={currentWord.word}
+              example={currentExample.sentence}
+              translation={currentExample.sentence_translation}
+              onComplete={handleCardComplete}
+            />
         </div>
       ) : (
         <div data-testid="empty-state" className="empty-state">

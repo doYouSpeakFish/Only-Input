@@ -67,18 +67,110 @@
   letter-spacing: 0.5px;
 }
 
-.completion-message {
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 0 1rem;
+}
+
+.card-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.card {
   text-align: center;
   padding: 2rem;
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+  background: white;
   border-radius: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin: 2rem auto;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 100%;
+}
+
+.flashcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.flashcard h2 {
+  width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  margin: 0;
+  font-size: 2rem;
+}
+
+.flashcard p {
+  width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+[data-testid="reveal-button"],
+[data-testid="correct-button"],
+[data-testid="wrong-button"] {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  min-width: 100px;
+}
+
+[data-testid="reveal-button"] {
+  background-color: #4CAF50;
+  color: white;
+}
+
+[data-testid="correct-button"] {
+  background-color: #4CAF50;
+  color: white;
+}
+
+[data-testid="wrong-button"] {
+  background-color: #f44336;
+  color: white;
+}
+
+.card-aligner {
+  display: table-cell;
+  vertical-align: middle;
+  margin-left: 2rem;
+  margin-right: 2rem;
+}
+
+.completion-message {
+  text-align: center;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4a 100%);
+  border-radius: 1rem;
+  width: 100%;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .completion-message h2 {
@@ -109,17 +201,3 @@
 .completion-message .continue-button:hover {
   background-color: #34495e;
 }
-
-.flashcard {
-  text-align: center;
-  padding: 2rem;
-  background: white;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 600px;
-  margin: 2rem auto;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-} 
