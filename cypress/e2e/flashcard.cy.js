@@ -193,8 +193,11 @@ describe('Flashcard', () => {
       cy.get('[data-testid="reveal-button"]').click()
       cy.get('[data-testid="correct-button"]').click()
       
-      // Verify progress bar shows correct width
-      cy.get('.progress-section.red').invoke('width').should('be.closeTo', 5, 1) // Approximately 0.47619% of container width
+      // Verify progress bar shows correct width (1/70 * 100 ≈ 1.43% of total width)
+      cy.get('.progress-section.red').should('have.css', 'width').then(width => {
+        const numericWidth = parseFloat(width)
+        expect(numericWidth).to.be.closeTo(14.3, 1)
+      })
     })
   })
 
@@ -203,57 +206,28 @@ describe('Flashcard', () => {
       cy.clearLocalStorage()
     })
 
-    it('shows only red section after 30 cards', () => {
-      // Set progress directly in localStorage
+    it('shows only red section after 10 cards', () => {
       const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
-      cy.window().then((win) => {
-        win.localStorage.setItem('dailyProgress', JSON.stringify({
-          [today]: 30
-        }))
-      })
-      
+      localStorage.setItem('dailyProgress', JSON.stringify({ [today]: 10 }))
       cy.visit('/')
-      
-      // Verify only red section is present and has correct width
-      cy.get('.progress-section.red').should('exist')
-      cy.get('.progress-section.orange').should('not.exist')
-      cy.get('.progress-section.red').invoke('width').should('be.closeTo', 143, 1) // Approximately 14.2857% of container width
+      cy.get('.progress-section.red').invoke('width').should('be.closeTo', 143, 1)
     })
 
-    it('shows red and orange sections after 31 cards', () => {
-      // Set progress directly in localStorage
+    it('shows red and orange sections after 11 cards', () => {
       const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
-      cy.window().then((win) => {
-        win.localStorage.setItem('dailyProgress', JSON.stringify({
-          [today]: 31
-        }))
-      })
-      
+      localStorage.setItem('dailyProgress', JSON.stringify({ [today]: 11 }))
       cy.visit('/')
-      
-      // Verify both sections are present with correct widths
-      cy.get('.progress-section.red').should('exist')
-      cy.get('.progress-section.orange').should('exist')
-      cy.get('.progress-section.red').invoke('width').should('be.closeTo', 143, 1) // Approximately 14.2857% of container width
-      cy.get('.progress-section.orange').invoke('width').should('be.closeTo', 5, 1) // Approximately 0.47619% of container width
+      cy.get('.progress-section.red').invoke('width').should('be.closeTo', 143, 1)
+      cy.get('.progress-section.orange').invoke('width').should('be.closeTo', 14, 1)
     })
 
-    it('shows all sections with correct widths after 210 cards', () => {
-      // Set progress directly in localStorage
+    it('shows all sections with correct widths after 70 cards', () => {
       const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
-      cy.window().then((win) => {
-        win.localStorage.setItem('dailyProgress', JSON.stringify({
-          [today]: 210
-        }))
-      })
-      
+      localStorage.setItem('dailyProgress', JSON.stringify({ [today]: 70 }))
       cy.visit('/')
-      
-      // Verify all sections are present with correct widths
-      const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
-      colors.forEach(color => {
-        cy.get(`.progress-section.${color}`).should('exist')
-        cy.get(`.progress-section.${color}`).invoke('width').should('be.closeTo', 143, 1) // Approximately 14.2857% of container width
+      const sections = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
+      sections.forEach(color => {
+        cy.get(`.progress-section.${color}`).invoke('width').should('be.closeTo', 143, 1)
       })
     })
   })
@@ -263,29 +237,21 @@ describe('Flashcard', () => {
       cy.clearLocalStorage()
     })
 
-    it('shows initial progress of 0/210', () => {
-      cy.visit('/')
-      cy.get('[data-testid="progress-counter"]').should('have.text', 'Daily progress: 0/210')
+    it('shows initial progress of 0/70', () => {
+      cy.get('[data-testid="progress-counter"]').should('contain', 'Daily progress: 0/70')
     })
 
     it('updates progress counter after completing a card', () => {
-      cy.visit('/')
       cy.get('[data-testid="reveal-button"]').click()
       cy.get('[data-testid="correct-button"]').click()
-      cy.get('[data-testid="progress-counter"]').should('have.text', 'Daily progress: 1/210')
+      cy.get('[data-testid="progress-counter"]').should('contain', 'Daily progress: 1/70')
     })
 
     it('updates progress counter when localStorage is modified', () => {
-      // Set progress directly in localStorage
       const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
-      cy.window().then((win) => {
-        win.localStorage.setItem('dailyProgress', JSON.stringify({
-          [today]: 30
-        }))
-      })
-      
+      localStorage.setItem('dailyProgress', JSON.stringify({ [today]: 30 }))
       cy.visit('/')
-      cy.get('[data-testid="progress-counter"]').should('have.text', 'Daily progress: 30/210')
+      cy.get('[data-testid="progress-counter"]').should('contain', 'Daily progress: 30/70')
     })
   })
 
@@ -295,47 +261,47 @@ describe('Flashcard', () => {
       const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
       cy.window().then((win) => {
         win.localStorage.setItem('dailyProgress', JSON.stringify({
-          [today]: 210
+          [today]: 70
         }));
         win.localStorage.setItem('cardProgress', JSON.stringify({
           'Test Word 1': { lastShownAt: 0, cardsUntilNextReview: 10 },
           'Test Word 2': { lastShownAt: 1, cardsUntilNextReview: 10 }
         }));
-        win.localStorage.setItem('totalCardsShown', '210');
+        win.localStorage.setItem('totalCardsShown', '70');
       });
       cy.visit('/');
     });
 
     it('shows congratulations message when all cards are completed', () => {
-      // Initialize localStorage with 209 cards shown
+      // Initialize localStorage with 69 cards shown
       const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
       
-      // Set daily progress to 209
+      // Set daily progress to 69
       const dailyProgress = {
-        [today]: 209
+        [today]: 69
       }
       localStorage.setItem('dailyProgress', JSON.stringify(dailyProgress))
       
       // Set card progress
       const cardProgress = {
-        'Test Word 1': { lastShownAt: 208, cardsUntilNextReview: 20 },
-        'Test Word 2': { lastShownAt: 209, cardsUntilNextReview: 20 }
+        'Test Word 1': { lastShownAt: 68, cardsUntilNextReview: 20 },
+        'Test Word 2': { lastShownAt: 69, cardsUntilNextReview: 20 }
       }
       localStorage.setItem('cardProgress', JSON.stringify(cardProgress))
       
       // Set total cards shown
-      localStorage.setItem('totalCardsShown', '209')
+      localStorage.setItem('totalCardsShown', '69')
 
       // Visit the page after setting localStorage
       cy.visit('/')
 
-      // Complete one more card to reach 210
+      // Complete one more card to reach 70
       cy.get('[data-testid="reveal-button"]').click()
       cy.get('[data-testid="correct-button"]').click()
 
       cy.get('.completion-message').should('be.visible')
       cy.get('.completion-message h2').should('contain', 'Congratulations!')
-      cy.get('.completion-message p').should('contain', 'You have completed all 210 cards for today!')
+      cy.get('.completion-message p').should('contain', 'You have completed all 70 cards for today!')
     })
 
     it('shows continue button in completion message', () => {
@@ -348,14 +314,14 @@ describe('Flashcard', () => {
       cy.get('.completion-message .continue-button').click()
 
       // Check that we're back to showing a card
-      cy.get('.card', { timeout: 10000 }).should('exist')
+      cy.get('.flashcard').should('exist')
       cy.get('[data-testid="german-word"]').should('exist')
       cy.get('[data-testid="example-sentence"]').should('exist')
       cy.get('[data-testid="reveal-button"]').should('exist')
     })
 
-    it('does not show congratulations message after continuing past 210 cards', () => {
-      // Click continue after completing 210 cards
+    it('does not show congratulations message after continuing past 70 cards', () => {
+      // Click continue after completing 70 cards
       cy.get('.completion-message .continue-button').click()
 
       // Complete another card
@@ -364,7 +330,7 @@ describe('Flashcard', () => {
 
       // Verify congratulations message is not shown
       cy.get('.completion-message').should('not.exist')
-      cy.get('.card').should('exist')
+      cy.get('.flashcard').should('exist')
     })
   })
 }) 

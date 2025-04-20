@@ -46,12 +46,12 @@ function getDailyProgressPercentage() {
   const today = new Date().toISOString().split('T')[0].replace(/-/g, '')
   const progress = getDailyProgress()
   const correctToday = progress[today] || 0
-  return (correctToday / 210) * 100 // Updated to 210 cards
+  return (correctToday / 70) * 100 // Updated from 210 to 70 cards
 }
 
 function getProgressColors(correctToday) {
   const sections = 7
-  const cardsPerSection = 30
+  const cardsPerSection = 10 // Updated from 30 to 10 cards per section
   const totalSections = Math.ceil(correctToday / cardsPerSection)
   
   const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']
@@ -170,10 +170,10 @@ function App() {
     setProgressPercentage(getDailyProgressPercentage())
     setProgressColors(getProgressColors(todayProgress))
 
-    // Only show completion message if we load the page exactly at 210 cards
-    setShowCompletion(todayProgress === 210)
+    // Only show completion message if we load the page exactly at 70 cards
+    setShowCompletion(todayProgress === 70)
 
-    if (todayProgress >= 210) {
+    if (todayProgress >= 70) {
       const nextWord = getNextCard()
       if (nextWord) {
         setCurrentWord(nextWord)
@@ -196,8 +196,8 @@ function App() {
     setProgressPercentage(getDailyProgressPercentage())
     setProgressColors(getProgressColors(todayProgress))
 
-    // Show completion message only when we've just reached 210
-    if (todayProgress === 210) {
+    // Show completion message only when we've just reached 70
+    if (todayProgress === 70) {
       setShowCompletion(true)
       setCurrentWord(null)
       setCurrentExample(null)
@@ -238,7 +238,7 @@ function App() {
           ))}
         </div>
         <div className="progress-counter" data-testid="progress-counter">
-          Daily progress: {correctToday}/210
+          Daily progress: {correctToday}/70
         </div>
       </div>
       
@@ -246,7 +246,7 @@ function App() {
         <div className="card-container">
           <div className="completion-message">
             <h2>Congratulations!</h2>
-            <p>You have completed all 210 cards for today!</p>
+            <p>You have completed all 70 cards for today!</p>
             <button className="continue-button" onClick={handleContinue}>
               Continue Practicing
             </button>
