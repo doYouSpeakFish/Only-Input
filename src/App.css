@@ -201,3 +201,34 @@
 .completion-message .continue-button:hover {
   background-color: #34495e;
 }
+
+/* Homepage Styles */
+.home-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh; /* Adjust as needed */
+  text-align: center;
+}
+
+.home-page h1 {
+  margin-bottom: 2rem;
+}
+
+/* Style the link/button on the homepage */
+.home-page .button-link button {
+  padding: 10px 20px;
+  font-size: 1.1rem; /* Slightly larger font */
+  cursor: pointer;
+  background-color: #007bff; /* Example blue */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none; /* Remove underline from link if styling the Link directly */
+  transition: background-color 0.2s ease;
+}
+
+.home-page .button-link button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}

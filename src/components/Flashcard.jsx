@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import '../App.css'
 
 // Card progress tracking
 const CARD_PROGRESS_KEY = 'cardProgress'
@@ -49,22 +50,25 @@ function updateCardProgress(word, isCorrect) {
 function Flashcard({ word, example, translation, onComplete }) {
   const [isRevealed, setIsRevealed] = useState(false)
 
+  // Reset reveal state when the word changes (new card)
+  useEffect(() => {
+    setIsRevealed(false)
+  }, [word])
+
   const handleReveal = () => {
     setIsRevealed(true)
   }
 
   const handleCorrect = () => {
     onComplete(true)
-    setIsRevealed(false)
   }
 
   const handleWrong = () => {
     onComplete(false)
-    setIsRevealed(false)
   }
 
   return (
-    <div className="flashcard">
+    <div className="flashcard card-container">
       <h2 data-testid="german-word">{word}</h2>
       <p data-testid="example-sentence">{example}</p>
       {isRevealed ? (
